@@ -36,22 +36,26 @@ def Exploratory_Data_Analysis(data):
 
 	#Gray scale image 
 	img = cv2.imread('image1.jpg',0)
+	cv2.imshow('image1',img)
+	cv2.waitKey()
 
 	#histogram showing intensity of image (0-255, 0 = dark, 255 = bright)
 	plt.hist(img.ravel(),256,[0,256])
 	plt.show()
 	
-	#2D histogram showing Hue & Saturation
+
+	#RGB image 
 
 	img2 = cv2.imread('image1.jpg')
+	cv2.imshow('image1',img2)
+	cv2.waitKey()
+
+	#2D histogram showing Hue & Saturation
 	hsv = cv2.cvtColor(img2,cv2.COLOR_BGR2HSV)
-	hist = cv2.calcHist([hsv], [0, 1], None, [180, 256], [0, 180, 0, 256])
+	hist = cv2.calcHist([hsv], [0, 1], None, [180, 50], [0, 180, 0, 50])
 	plt.imshow(hist,interpolation = 'nearest')
 	plt.show()
 	
-	
-	cv2.imshow('image',img)
-	cv2.waitKey()
 
 
 if __name__ == '__main__':
