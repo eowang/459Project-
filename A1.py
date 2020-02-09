@@ -3,6 +3,8 @@ import sys
 import matplotlib.pyplot as plt
 from collections import Counter
 import cv2
+import numpy as np
+
 
 def count_null_rows(row):
     null_count = 0
