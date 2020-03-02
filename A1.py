@@ -233,13 +233,27 @@ def Text_Feature_Extraction(data):
     all_feature_words = sum(data.features, [])
     feature_word_counts =  Counter(all_feature_words)
     top_words = [word for word,cnt in feature_word_counts.most_common(70)]
-    data['common_features'] = data['features'].apply(lambda x: [word for word in x if word in top_words])
-    data.to_csv('raw_data.csv', index=False)
+    # data['common_features'] = data['features'].apply(lambda x: [word for word in x if word in top_words])
+    # data.to_csv('raw_data.csv', index=False)
+    for word in top_words:
+        data[word] = data['features'].apply(lambda x:hasFeature(word,x))
+    
+    
+
+def hasFeature(word,row):
+    if word in row: 
+        return 1 
+    return 0 
+
 
 if __name__ == '__main__':
     data = pd.read_json(sys.argv[1])
-    Missing_Values(data)
-    data = Outliers(data)
-    Exploratory_Data_Analysis(data)
-    Image_Feature_Extraction(data)
-    Text_Feature_Extraction(data)
+    # Missing_Values(data)
+    # data = Outliers(data)
+    # Exploratory_Data_Analysis(data)
+    # Image_Feature_Extraction(data)
+    # Text_Feature_Extraction(data)
+    # data.to_csv('raw_data.csv', index=False)
+    nearestSubway(data)
+
+    

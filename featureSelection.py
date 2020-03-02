@@ -50,12 +50,18 @@ def recursiveFeature(X,y):
     print("Feature Ranking: %s" % fit.ranking_)
 
 def numericalFeatureSelection(data):
-    data = data[['bathrooms','bedrooms','latitude','listing_id','longitude','price','hour_created','word_count','numeric_interest_level']]
+    # data = data[['bathrooms','bedrooms','latitude','listing_id','longitude','price','hour_created','word_count','numeric_interest_level']]
+    data = data.drop(data.columns[[2, 3,4,5,6,10,11,13]], axis=1)
+    cols = list(data)
+    cols.insert(-1, cols.pop(cols.index('interest_level')))
+    cols.insert(-1, cols.pop(cols.index('Subway')))
+    data = data[cols]
     data['longitude']= data['longitude'].abs()
     
 
-    X = data.iloc[:,0:8]  #independent columns
+    X = data.iloc[:,0:79]  #independent columns
     y = data.iloc[:,-1]    #target column i.e price range
+    data.to_csv('test_data.csv', index=False)
     chiSquared(X,y) 
     featureImportance(X,y)
     heatMap(data)
