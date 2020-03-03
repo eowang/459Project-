@@ -2,11 +2,12 @@ import pandas as pd
 import sys
 import matplotlib.pyplot as plt 
 import numpy as np
+import statistics
 from sklearn.svm import SVC
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold
 from sklearn.linear_model import LogisticRegression
 
-# DF2= pd.read_csv("subwayData.csv")
+# DF2= pd.read_csv("subwayData.csv") 
 def Min_Euclidean_Dist(row):
     data2['distance']= data2.apply(lambda x: np.square())
     return np.linalg.norm(data1[cols].values - data2[cols].values,
@@ -56,14 +57,23 @@ def Logistic_Regression(data):
 
     X = data.drop(['numeric_interest_level','interest_level', 'photos', 'description', 'features', 'listing_id', 'display_address', 'building_id', 'created', 'street_address', 'manager_id'], axis=1)
     y = data['numeric_interest_level']
-    X_train, X_valid, y_train, y_valid = train_test_split(X, y)
+    kf = KFold(n_splits = 2)
+    scores = []
+    i = 0
 
-    # play around with hidden layer sizes and solver
-    logistic_model = LogisticRegression()
-    logistic_model.fit(X_train, y_train)
-    logistic_results = logistic_model.score(X_valid, y_valid)
+    KFold(n_splits=2, random_state=None, shuffle=False)
 
-    print(logistic_results)
+    for train_index, test_index in kf.split(X):
+        print('TRAIN:', train_index, 'TEST:', test_index)
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+
+        # logistic_model = LogisticRegression()
+        # logistic_model.fit(X_train, y_train)
+        # scores[i] = logistic_model.score(X_valid, y_valid)
+        # i += 1
+
+    avg_score = statistics.mean(scores)
 
 def SVM(data):
     #remember to remove this later
