@@ -6,6 +6,7 @@ import statistics
 from sklearn.svm import SVC
 from sklearn.model_selection import KFold
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import log_loss
 
 # DF2= pd.read_csv("subwayData.csv") 
 def Min_Euclidean_Dist(row):
@@ -57,23 +58,25 @@ def Logistic_Regression(data):
 
     X = data.drop(['numeric_interest_level','interest_level', 'photos', 'description', 'features', 'listing_id', 'display_address', 'building_id', 'created', 'street_address', 'manager_id'], axis=1)
     y = data['numeric_interest_level']
-    kf = KFold(n_splits = 2)
+    kf = KFold(n_splits = 5)
     scores = []
-    i = 0
 
     KFold(n_splits=2, random_state=None, shuffle=False)
 
     for train_index, test_index in kf.split(X):
-        print('TRAIN:', train_index, 'TEST:', test_index)
-        X_train, X_test = X[train_index], X[test_index]
-        y_train, y_test = y[train_index], y[test_index]
+        #print('TRAIN:', train_index, 'TEST:', test_index)
+        X_train, X_valid = X.iloc[train_index], X.iloc[test_index]
+        y_train, y_valid = y.iloc[train_index], y.iloc[test_index]
 
-        # logistic_model = LogisticRegression()
-        # logistic_model.fit(X_train, y_train)
-        # scores[i] = logistic_model.score(X_valid, y_valid)
-        # i += 1
+        logistic_model = LogisticRegression()
+        logistic_model.fit(X_train, y_train)
+
+        predicted_prob = logistic_model.predict_proba(X_valid)
+        scores.append(log_loss(y_valid, predicted_prob))
 
     avg_score = statistics.mean(scores)
+    print("Scores are:", scores)
+    print("Average score is:", avg_score)
 
 def SVM(data):
     #remember to remove this later
@@ -81,19 +84,31 @@ def SVM(data):
 
     X = data.drop(['interest_level', 'photos', 'description', 'features', 'listing_id', 'display_address', 'building_id', 'created', 'street_address', 'manager_id'], axis=1)
     y = data['interest_level']
-    X_train, X_valid, y_train, y_valid = train_test_split(X, y)
+    kf = KFold(n_splits = 5)
+    scores = []
 
-    svm_model = SVC(C=10, kernel='linear')
-    svm_model.fit(X_train, y_train)
-    svm_results = svm_model.score(X_valid, y_valid)
+    KFold(n_splits=2, random_state=None, shuffle=False)
 
-    print(svm_results)
+    for train_index, test_index in kf.split(X):
+        #print('TRAIN:', train_index, 'TEST:', test_index)
+        X_train, X_valid = X.iloc[train_index], X.iloc[test_index]
+        y_train, y_valid = y.iloc[train_index], y.iloc[test_index]
+
+        svm_model = SVC(C=10, kernel='linear', probability=True)
+        svm_model.fit(X_train, y_train)
+
+        predicted_prob = svm_model.predict_proba(X_valid)
+        scores.append(log_loss(y_valid, predicted_prob))
+
+    avg_score = statistics.mean(scores)
+    print("Scores are:", scores)
+    print("Average score is:", avg_score)
 
 if __name__ == '__main__':
     data = pd.read_csv('data_after_M1.csv')
     # data = pd.read_json(sys.argv[1])
     # Feature_Selection(data)
     # Decision_Tree(data)
-    Logistic_Regression(data)
-    # SVM(data)
+    # Logistic_Regression(data)
+    SVM(data)
     # Nearest_Subway(data)
