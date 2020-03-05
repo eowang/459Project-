@@ -9,6 +9,12 @@ from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
 from sklearn.metrics import log_loss
 
+#
+#Libraries for stratified sampling, to run on smaller sample subset of rows from each feature
+#
+
+from sklearn.model_selection import StratifiedShuffleSplit
+
 
 # DF2= pd.read_csv("subwayData.csv")
 def Min_Euclidean_Dist(row):
@@ -84,13 +90,13 @@ def Decision_Tree(X,y):
     
 
 # KFOLD IMPLEMENTATION
-  col_names = ['interest_level',	'hour_created',	'numeric_interest_level',	'word_count',	'Elevator',	'Hardwood Floors',	'Cats Allowed',	'Dogs Allowed',	'Doorman',	'Dishwasher',	'No Fee	Laundry in Building	Fitness Center',	'Pre-War',	'Laundry in Unit',	'Roof Deck',	'Outdoor Space',	'Dining Room',	'High Speed Internet',	'Balcony',	'Swimming Pool',	'Laundry In Building',	'New Construction',	'Terrace',	'Exclusive	Loft',	'Garden/Patio',	'Wheelchair Access',	'Common Outdoor Space',	'HARDWOOD',	'Fireplace',	'SIMPLEX',	'prewar',	'LOWRISE',	'Garage	Laundry Room',	'Reduced Fee',	'Laundry In Unit',	'Furnished',	'Multi-Level',	'Private Outdoor Space',	'Prewar	PublicOutdoor',	'Parking Space',	'Roof-deck',	'dishwasher',	'High Ceilings',	'elevator',	'Renovated',	'Pool',	'LAUNDRY',	'Green Building',	'HIGH CEILINGS',	'LIVE IN SUPER',	'High Ceiling',	'Washer in Unit',	'Dryer in Unit',	'Storage',	'Stainless Steel Appliances',	'On-site laundry',	'Concierge',	'Newly renovated',	'On-site Laundry',	'Hardwood',	'Light',	'Live In Super',	'On-site Garage', 'Washer/Dryer',	'Granite Kitchen',	'Gym/Fitness',	'Pets on approval',	'Marble', 'Bath',	'Walk in Closet(s)',	'Subway']
-    col_names = ['longitude', 'latitude', 'bedrooms', 'bathrooms']   
-    data.head(5000)
+    # col_names = ['interest_level',	'hour_created',	'numeric_interest_level',	'word_count',	'Elevator',	'Hardwood Floors',	'Cats Allowed',	'Dogs Allowed',	'Doorman',	'Dishwasher',	'No Fee	Laundry in Building	Fitness Center',	'Pre-War',	'Laundry in Unit',	'Roof Deck',	'Outdoor Space',	'Dining Room',	'High Speed Internet',	'Balcony',	'Swimming Pool',	'Laundry In Building',	'New Construction',	'Terrace',	'Exclusive	Loft',	'Garden/Patio',	'Wheelchair Access',	'Common Outdoor Space',	'HARDWOOD',	'Fireplace',	'SIMPLEX',	'prewar',	'LOWRISE',	'Garage	Laundry Room',	'Reduced Fee',	'Laundry In Unit',	'Furnished',	'Multi-Level',	'Private Outdoor Space',	'Prewar	PublicOutdoor',	'Parking Space',	'Roof-deck',	'dishwasher',	'High Ceilings',	'elevator',	'Renovated',	'Pool',	'LAUNDRY',	'Green Building',	'HIGH CEILINGS',	'LIVE IN SUPER',	'High Ceiling',	'Washer in Unit',	'Dryer in Unit',	'Storage',	'Stainless Steel Appliances',	'On-site laundry',	'Concierge',	'Newly renovated',	'On-site Laundry',	'Hardwood',	'Light',	'Live In Super',	'On-site Garage', 'Washer/Dryer',	'Granite Kitchen',	'Gym/Fitness',	'Pets on approval',	'Marble', 'Bath',	'Walk in Closet(s)',	'Subway']
+    # col_names = ['longitude', 'latitude', 'bedrooms', 'bathrooms']   
+    # data.head(5000)
 
-    X = data[col_names].sample(n=300)
+    # X = data[col_names].sample(n=300)
 
-    y = data.interest_level.sample(n=300)
+    # y = data.interest_level.sample(n=300)
 # 
 #
 #
@@ -141,18 +147,29 @@ def Decision_Tree(X,y):
 # def SVM(data):
 
 if __name__ == '__main__':
+    #
+    #Run with python3 milestone2.py data_after_M1.csv
+    #
     data = pd.read_csv(sys.argv[1])
+
+    #provide the most signifcantly correlated features to 'interest_level' feature.
+    X = data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','Doorman','No Fee','Pre-War','Dining Room', 'Balcony','SIMPLEX','LOWRISE','Garage','Reduced Fee','Furnished','LAUNDRY','Hardwood','Subway']]
+    y = data['interest_level']
+    #
+    #Stratified sampling of our Y dependent class, this will sample each stratum(low,med,high) 
+    #in our interest_level feature equally.
+    #
+    y_data = StratifiedShuffleSplit(n_splits=3, test_size = 5000, random_state=2)
+    y_data.get_n_splits(X,y)
+
+    print(y_data)
 
     # print(data.head(n=300))
     # print(type(data.iloc[:300]))
     # print(type(data.numeric_interest_level[1]))
 	# data = pd.read_json(sys.argv[1])
 	# Feature_Selection(data)
-    Decision_Tree(data)
+    # Decision_Tree(X,y)
 	# Logistic_Regression(data)
-	# SVM(data)
-<<<<<<< HEAD
+	SVM(X,y)
     # Nearest_Subway(data)
-=======
-    Nearest_Subway(data)
->>>>>>> e63fe645998a8a431a52f033ef6634960b7db0ab
