@@ -6,7 +6,7 @@ import statistics
 from sklearn.svm import SVC
 from sklearn.model_selection import KFold
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import log_loss
+from sklearn.metrics import log_loss, f1_score, confusion_matrix
 
 
 def ndis(row, DF2):
@@ -109,29 +109,35 @@ def Logistic_Regression_score(X, y):
         logistic_model.fit(X_train, y_train)
 
         predicted_prob = logistic_model.predict_proba(X_valid)
-        scores.append(log_loss(y_valid, predicted_prob))
+        # scores.append(log_loss(y_valid, predicted_prob))
+        # scores.append(f1_score(y_valid, predicted_prob, average="macro"))
+
 
     avg_score = statistics.mean(scores)
     print("Scores are:", scores)
     print("Average score is:", avg_score)
 
-    predicted = logistic_model.predict_proba(test_data)
+    # predicted = logistic_model.predict_proba(test_data)
     
 
 def Logistic_Regression_kaggle(test_data, X, y, listing_id):
+    logistic_model = LogisticRegression()
+    logistic_model.fit(X, y)
+    print("classes are:", logistic_model.classes_)
+    predicted = logistic_model.predict_proba(test_data)
 
-	logistic_model = LogisticRegression()
-	logistic_model.fit(X, y)
-	print("classes are:", logistic_model.classes_)
-	predicted = logistic_model.predict_proba(test_data)
-	
-	col_names = ['high', 'low', 'medium']
-	df_predict_proba = pd.DataFrame(predicted, columns= col_names)
-	df_predict_proba['listing_id'] = listing_id.astype(int)
-	col_names = ['listing_id', 'high', 'medium', 'low']
-	df_predict_proba = df_predict_proba[col_names]
+    print(len(predicted))
+    col_names = ['high', 'low', 'medium']
+    df_predict_proba = pd.DataFrame(predicted, columns= col_names)
 
-	df_predict_proba.to_csv('/home/cyndyn/sfuhome/kaggle_submission.csv', index=False)
+    print(df_predict_proba.shape)
+    df_predict_proba['listing_id'] = listing_id.astype(int)
+    col_names = ['listing_id', 'high', 'medium', 'low']
+
+    df_predict_proba = df_predict_proba[col_names]
+    print(df_predict_proba.shape)
+    df_predict_proba= df_predict_proba.dropna()
+    df_predict_proba.to_csv('kaggle_submission.csv')
 
     
 
@@ -152,8 +158,11 @@ def SVM_score(X, y):
         svm_model.fit(X_train, y_train)
 
         predicted_prob = svm_model.predict_proba(X_valid)
-        scores.append(log_loss(y_valid, predicted_prob))
+        # scores.append(log_loss(y_valid, predicted_prob))
 
+        
+        scores.append(f1_score(y_valid, predicted_prob, average="macro"))
+        
     avg_score = statistics.mean(scores)
     print("Scores are:", scores)
     print("Average score is:", avg_score)
@@ -171,20 +180,25 @@ def SVM_kaggle(test_data, X, y):
 if __name__ == '__main__':
     data = pd.read_csv('data_after_M1.csv')
     # data = pd.read_json(sys.argv[1])
-    test_data = pd.read_json(sys.argv[1])
-    test_data.to_csv('/home/cyndyn/sfuhome/test.csv', index=False)
+    test_data = pd.read_csv('test_raw_data.csv')
+    # test_data = pd.read_json(sys.argv[1])
+    test_data.to_csv('test.csv', index = False)
     listing_id = test_data['listing_id']
-    test_data = data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','Doorman','No Fee','Pre-War','Dining Room', 'Balcony','SIMPLEX','LOWRISE','Garage','Reduced Fee','Furnished','LAUNDRY','Hardwood','Subway']]
-
+    print("Listing Id shape:", listing_id.shape)
+    # test_data =data.drop(data.columns[[0,3,4,5,6,7,9,11,12,14]])
+    test_data = test_data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','Doorman','No Fee','Pre-War','Dining Room', 'Balcony','SIMPLEX','LOWRISE','Garage','Reduced Fee','Furnished','LAUNDRY','Hardwood','dist_dt']]
+    print("After dropping:", test_data.shape)
     data = data.sample(n=140)
-    X= data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','Doorman','No Fee','Pre-War','Dining Room', 'Balcony','SIMPLEX','LOWRISE','Garage','Reduced Fee','Furnished','LAUNDRY','Hardwood','Subway']]
+    # X= data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','Doorman','No Fee','Pre-War','Dining Room', 'Balcony','SIMPLEX','LOWRISE','Garage','Reduced Fee','Furnished','LAUNDRY','Hardwood','dist_dt']]
     y = data['interest_level']
     # Nearest_Subway(data)
-    # Distance_Downtown(data)
+    Distance_Downtown(data)
+    X= data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','Doorman','No Fee','Pre-War','Dining Room', 'Balcony','SIMPLEX','LOWRISE','Garage','Reduced Fee','Furnished','LAUNDRY','Hardwood','dist_dt']]
+
     Feature_Selection(data)
-    Logistic_Regression_kaggle(test_data, X, y, listing_id)
+    # Logistic_Regression_kaggle(test_data, X, y, listing_id)
     # data.to_csv('testtesttest.csv', index=False)
     # Decision_Tree(data, X, y)
-    # Logistic_Regression(X, y)
-    # SVM(X, y)
+    # Logistic_Regression_score(X, y)
+    SVM_score(X, y)
     # Nearest_Subway(data)
