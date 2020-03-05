@@ -87,11 +87,48 @@ def Feature_Selection(data):
   
     # recursiveFeature(X,y)
 
-# def Decision_Tree(data):
+def Decision_Tree(X, y):
+    kf = KFold(n_splits = 4)
+
+    scores = []
+
+    KFold(n_splits=4, random_state=None, shuffle=False)
+
+    dec_Tree_class = DecisionTreeClassifier(criterion='entropy')
+
+    for train_index, test_index in kf.split(X):
+        X_train, X_valid = X.iloc[train_index], X.iloc[test_index]
+        y_train, y_valid = y.iloc[train_index], y.iloc[test_index]
+
+    dec_Tree_class = dec_Tree_class.fit(X_train, y_train)
+    
+    pred_prob = dec_Tree_class.predict_proba(X_valid)
+    scores.append(log_loss(y_valid, pred_prob))
+
+    avg_score = statistics.mean(scores)
+    print("\n\nDecision tree scores:")
+    print("Scores are:", scores)
+    print("Average score is:", avg_score)
+
+
+def Decision_tree_kaggle(test_data, X, y, listing_id):
+    tree_model = DecisionTreeClassifier(criterion='entropy')
+    tree_model.fit(X, y)
+
+    predicted = tree_model.predict_proba(test_data)
+
+    col_names = tree_model.classes_
+    df_predict_proba = pd.DataFrame(predicted, columns= col_names)
+
+    df_predict_proba['listing_id'] = listing_id.astype(int)
+    col_names = ['listing_id', 'high', 'medium', 'low']
+
+    df_predict_proba = df_predict_proba[col_names]
+    df_predict_proba= df_predict_proba.dropna()
+    df_predict_proba.to_csv('kaggle_submission_TREE.csv')
+
 
 def Logistic_Regression_score(X, y):
-   
-
     # X= data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','numeric_interest_level']]
     # X = data.drop(['numeric_interest_level','interest_level', 'photos', 'description', 'features', 'listing_id', 'display_address', 'building_id', 'created', 'street_address', 'manager_id'], axis=1)
     # y = data['numeric_interest_level']
@@ -114,6 +151,7 @@ def Logistic_Regression_score(X, y):
 
 
     avg_score = statistics.mean(scores)
+    print("\n\nLogistic regression score:")
     print("Scores are:", scores)
     print("Average score is:", avg_score)
 
@@ -137,8 +175,7 @@ def Logistic_Regression_kaggle(test_data, X, y, listing_id):
     df_predict_proba = df_predict_proba[col_names]
     print(df_predict_proba.shape)
     df_predict_proba= df_predict_proba.dropna()
-    df_predict_proba.to_csv('kaggle_submission.csv')
-
+    df_predict_proba.to_csv('kaggle_submission_LR.csv')
     
 
 def SVM_score(X, y):
@@ -147,14 +184,14 @@ def SVM_score(X, y):
     kf = KFold(n_splits = 5)
     scores = []
 
-    KFold(n_splits=2, random_state=None, shuffle=False)
+    # KFold(n_splits=2, random_state=None, shuffle=False)
 
     for train_index, test_index in kf.split(X):
         #print('TRAIN:', train_index, 'TEST:', test_index)
         X_train, X_valid = X.iloc[train_index], X.iloc[test_index]
         y_train, y_valid = y.iloc[train_index], y.iloc[test_index]
 
-        svm_model = SVC(C=10, kernel='linear', probability=True)
+        svm_model = SVC(kernel='linear', probability=True)
         svm_model.fit(X_train, y_train)
 
         predicted_prob = svm_model.predict_proba(X_valid)
@@ -164,18 +201,27 @@ def SVM_score(X, y):
         scores.append(f1_score(y_valid, predicted_prob, average="macro"))
         
     avg_score = statistics.mean(scores)
+    print("\n\nSVM scores: ")
     print("Scores are:", scores)
     print("Average score is:", avg_score)
 
     
+def SVM_kaggle(test_data, X, y, listing_id):
+    svm_model = SVC(kernel='linear', probability=True)
+    svm_model.fit(X, y)
 
-def SVM_kaggle(test_data, X, y):
-	svm_model = SVC(C=10, kernel='linear', probability=True)
-	svm_model.fit(X, y)
+    predicted = svm_model.predict_proba(test_data)
 
-	predicted = logistic_model.predict_proba(test_data)
+    col_names = svm_model.classes_
+    df_predict_proba = pd.DataFrame(predicted, columns= col_names)
+
+    df_predict_proba['listing_id'] = listing_id.astype(int)
+    col_names = ['listing_id', 'high', 'medium', 'low']
+
+    df_predict_proba = df_predict_proba[col_names]
+    df_predict_proba= df_predict_proba.dropna()
+    df_predict_proba.to_csv('kaggle_submission_SVM.csv')
     
-
 
 if __name__ == '__main__':
     data = pd.read_csv('data_after_M1.csv')
@@ -196,7 +242,9 @@ if __name__ == '__main__':
     X= data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','Doorman','No Fee','Pre-War','Dining Room', 'Balcony','SIMPLEX','LOWRISE','Garage','Reduced Fee','Furnished','LAUNDRY','Hardwood','dist_dt']]
 
     Feature_Selection(data)
+    # Decision_tree_kaggle(test_data, X, y, listing_id)
     # Logistic_Regression_kaggle(test_data, X, y, listing_id)
+    # SVM_kaggle(test_data, X, y, listing_id)
     # data.to_csv('testtesttest.csv', index=False)
     # Decision_Tree(data, X, y)
     # Logistic_Regression_score(X, y)
