@@ -53,7 +53,11 @@ def Nearest_Subway(data):
 
 # def Feature_Selection(data):
 
-def Decision_Tree(data):
+def Decision_Tree(X,y):
+#    
+# Attempt at writing Decision Tree with cross_validation.train_test_split
+# 
+   
     #'features'
     #col_names = ['interest_level',	'hour_created',	'numeric_interest_level',	'word_count',	'Elevator',	'Hardwood Floors',	'Cats Allowed',	'Dogs Allowed',	'Doorman',	'Dishwasher',	'No Fee	Laundry in Building	Fitness Center',	'Pre-War',	'Laundry in Unit',	'Roof Deck',	'Outdoor Space',	'Dining Room',	'High Speed Internet',	'Balcony',	'Swimming Pool',	'Laundry In Building',	'New Construction',	'Terrace',	'Exclusive	Loft',	'Garden/Patio',	'Wheelchair Access',	'Common Outdoor Space',	'HARDWOOD',	'Fireplace',	'SIMPLEX',	'prewar',	'LOWRISE',	'Garage	Laundry Room',	'Reduced Fee',	'Laundry In Unit',	'Furnished',	'Multi-Level',	'Private Outdoor Space',	'Prewar	PublicOutdoor',	'Parking Space',	'Roof-deck',	'dishwasher',	'High Ceilings',	'elevator',	'Renovated',	'Pool',	'LAUNDRY',	'Green Building',	'HIGH CEILINGS',	'LIVE IN SUPER',	'High Ceiling',	'Washer in Unit',	'Dryer in Unit',	'Storage',	'Stainless Steel Appliances',	'On-site laundry',	'Concierge',	'Newly renovated',	'On-site Laundry',	'Hardwood',	'Light',	'Live In Super',	'On-site Garage', 'Washer/Dryer',	'Granite Kitchen',	'Gym/Fitness',	'Pets on approval',	'Marble', 'Bath',	'Walk in Closet(s)',	'Subway']
     # col_names = ['longitude', 'latitude', 'bedrooms', 'bathrooms']   
@@ -80,22 +84,23 @@ def Decision_Tree(data):
     
 
 # KFOLD IMPLEMENTATION
-#   col_names = ['interest_level',	'hour_created',	'numeric_interest_level',	'word_count',	'Elevator',	'Hardwood Floors',	'Cats Allowed',	'Dogs Allowed',	'Doorman',	'Dishwasher',	'No Fee	Laundry in Building	Fitness Center',	'Pre-War',	'Laundry in Unit',	'Roof Deck',	'Outdoor Space',	'Dining Room',	'High Speed Internet',	'Balcony',	'Swimming Pool',	'Laundry In Building',	'New Construction',	'Terrace',	'Exclusive	Loft',	'Garden/Patio',	'Wheelchair Access',	'Common Outdoor Space',	'HARDWOOD',	'Fireplace',	'SIMPLEX',	'prewar',	'LOWRISE',	'Garage	Laundry Room',	'Reduced Fee',	'Laundry In Unit',	'Furnished',	'Multi-Level',	'Private Outdoor Space',	'Prewar	PublicOutdoor',	'Parking Space',	'Roof-deck',	'dishwasher',	'High Ceilings',	'elevator',	'Renovated',	'Pool',	'LAUNDRY',	'Green Building',	'HIGH CEILINGS',	'LIVE IN SUPER',	'High Ceiling',	'Washer in Unit',	'Dryer in Unit',	'Storage',	'Stainless Steel Appliances',	'On-site laundry',	'Concierge',	'Newly renovated',	'On-site Laundry',	'Hardwood',	'Light',	'Live In Super',	'On-site Garage', 'Washer/Dryer',	'Granite Kitchen',	'Gym/Fitness',	'Pets on approval',	'Marble', 'Bath',	'Walk in Closet(s)',	'Subway']
+  col_names = ['interest_level',	'hour_created',	'numeric_interest_level',	'word_count',	'Elevator',	'Hardwood Floors',	'Cats Allowed',	'Dogs Allowed',	'Doorman',	'Dishwasher',	'No Fee	Laundry in Building	Fitness Center',	'Pre-War',	'Laundry in Unit',	'Roof Deck',	'Outdoor Space',	'Dining Room',	'High Speed Internet',	'Balcony',	'Swimming Pool',	'Laundry In Building',	'New Construction',	'Terrace',	'Exclusive	Loft',	'Garden/Patio',	'Wheelchair Access',	'Common Outdoor Space',	'HARDWOOD',	'Fireplace',	'SIMPLEX',	'prewar',	'LOWRISE',	'Garage	Laundry Room',	'Reduced Fee',	'Laundry In Unit',	'Furnished',	'Multi-Level',	'Private Outdoor Space',	'Prewar	PublicOutdoor',	'Parking Space',	'Roof-deck',	'dishwasher',	'High Ceilings',	'elevator',	'Renovated',	'Pool',	'LAUNDRY',	'Green Building',	'HIGH CEILINGS',	'LIVE IN SUPER',	'High Ceiling',	'Washer in Unit',	'Dryer in Unit',	'Storage',	'Stainless Steel Appliances',	'On-site laundry',	'Concierge',	'Newly renovated',	'On-site Laundry',	'Hardwood',	'Light',	'Live In Super',	'On-site Garage', 'Washer/Dryer',	'Granite Kitchen',	'Gym/Fitness',	'Pets on approval',	'Marble', 'Bath',	'Walk in Closet(s)',	'Subway']
     col_names = ['longitude', 'latitude', 'bedrooms', 'bathrooms']   
     data.head(5000)
 
     X = data[col_names].sample(n=300)
 
-    y = data.numeric_interest_level.sample(n=300)
+    y = data.interest_level.sample(n=300)
 # 
-
+#
+#
     kf = KFold(n_splits = 4)
 
     scores = []
 
     KFold(n_splits=4, random_state=None, shuffle=False)
 
-    dec_Tree_class = DecisionTreeClassifier()
+    dec_Tree_class = DecisionTreeClassifier(criterion='entropy')
 
     for train_index, test_index in kf.split(X):
         X_train, X_valid = X.iloc[train_index], X.iloc[test_index]
@@ -113,6 +118,21 @@ def Decision_Tree(data):
 # 
 # 
 # 
+    # col_names = ['interest_level',	'hour_created',	'numeric_interest_level',	'word_count',	'Elevator',	'Hardwood Floors',	'Cats Allowed',	'Dogs Allowed',	'Doorman',	'Dishwasher',	'No Fee	Laundry in Building	Fitness Center',	'Pre-War',	'Laundry in Unit',	'Roof Deck',	'Outdoor Space',	'Dining Room',	'High Speed Internet',	'Balcony',	'Swimming Pool',	'Laundry In Building',	'New Construction',	'Terrace',	'Exclusive	Loft',	'Garden/Patio',	'Wheelchair Access',	'Common Outdoor Space',	'HARDWOOD',	'Fireplace',	'SIMPLEX',	'prewar',	'LOWRISE',	'Garage	Laundry Room',	'Reduced Fee',	'Laundry In Unit',	'Furnished',	'Multi-Level',	'Private Outdoor Space',	'Prewar	PublicOutdoor',	'Parking Space',	'Roof-deck',	'dishwasher',	'High Ceilings',	'elevator',	'Renovated',	'Pool',	'LAUNDRY',	'Green Building',	'HIGH CEILINGS',	'LIVE IN SUPER',	'High Ceiling',	'Washer in Unit',	'Dryer in Unit',	'Storage',	'Stainless Steel Appliances',	'On-site laundry',	'Concierge',	'Newly renovated',	'On-site Laundry',	'Hardwood',	'Light',	'Live In Super',	'On-site Garage', 'Washer/Dryer',	'Granite Kitchen',	'Gym/Fitness',	'Pets on approval',	'Marble', 'Bath',	'Walk in Closet(s)',	'Subway']
+    # #'features'
+    # X = data[col_names].iloc[:300]
+
+    # y = data.numeric_interest_level.iloc[:300]
+
+    # X_train, X_test, y_train, y_test, = train_test_split(X, y, test_size=0.3, random_state=1)
+
+    # dec_Tree_class = DecisionTreeClassifier(criterion='entropy')
+
+    # dec_Tree_class = dec_Tree_class.fit(X_train, y_train)
+
+    # y_pred = dec_Tree_class.predict(X_test)
+
+    # print("Accuracy:", metrics.accuracy.score(y_test, y_pred))
 
 
 
@@ -131,4 +151,8 @@ if __name__ == '__main__':
     Decision_Tree(data)
 	# Logistic_Regression(data)
 	# SVM(data)
+<<<<<<< HEAD
     # Nearest_Subway(data)
+=======
+    Nearest_Subway(data)
+>>>>>>> e63fe645998a8a431a52f033ef6634960b7db0ab
