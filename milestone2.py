@@ -60,7 +60,7 @@ def Feature_Selection(data):
     
     cols = list(data)
     cols.insert(-1, cols.pop(cols.index('interest_level')))
-    cols.insert(-1, cols.pop(cols.index('dist_dt')))
+    # cols.insert(-1, cols.pop(cols.index('dist_dt')))
     data = data[cols]
     data['longitude']= data['longitude'].abs()
     data['Roof Deck']= data['Roof Deck'] | data['Roof-deck']
@@ -89,7 +89,7 @@ def Feature_Selection(data):
 
 # def Decision_Tree(data):
 
-def Logistic_Regression(X, y):
+def Logistic_Regression_score(X, y):
    
 
     # X= data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','numeric_interest_level']]
@@ -104,7 +104,7 @@ def Logistic_Regression(X, y):
         #print('TRAIN:', train_index, 'TEST:', test_index)
         X_train, X_valid = X.iloc[train_index], X.iloc[test_index]
         y_train, y_valid = y.iloc[train_index], y.iloc[test_index]
-
+        print(y_train)
         logistic_model = LogisticRegression()
         logistic_model.fit(X_train, y_train)
 
@@ -115,7 +115,27 @@ def Logistic_Regression(X, y):
     print("Scores are:", scores)
     print("Average score is:", avg_score)
 
-def SVM(X, y):
+    predicted = logistic_model.predict_proba(test_data)
+    
+
+def Logistic_Regression_kaggle(test_data, X, y, listing_id):
+
+	logistic_model = LogisticRegression()
+	logistic_model.fit(X, y)
+	print("classes are:", logistic_model.classes_)
+	predicted = logistic_model.predict_proba(test_data)
+	
+	col_names = ['high', 'low', 'medium']
+	df_predict_proba = pd.DataFrame(predicted, columns= col_names)
+	df_predict_proba['listing_id'] = listing_id.astype(int)
+	col_names = ['listing_id', 'high', 'medium', 'low']
+	df_predict_proba = df_predict_proba[col_names]
+
+	df_predict_proba.to_csv('/home/cyndyn/sfuhome/kaggle_submission.csv', index=False)
+
+    
+
+def SVM_score(X, y):
     # X = data.drop(['interest_level', 'photos', 'description', 'features', 'listing_id', 'display_address', 'building_id', 'created', 'street_address', 'manager_id'], axis=1)
     # y = data['interest_level']
     kf = KFold(n_splits = 5)
@@ -138,17 +158,33 @@ def SVM(X, y):
     print("Scores are:", scores)
     print("Average score is:", avg_score)
 
+    
+
+def SVM_kaggle(test_data, X, y):
+	svm_model = SVC(C=10, kernel='linear', probability=True)
+	svm_model.fit(X, y)
+
+	predicted = logistic_model.predict_proba(test_data)
+    
+
+
 if __name__ == '__main__':
     data = pd.read_csv('data_after_M1.csv')
     # data = pd.read_json(sys.argv[1])
+    test_data = pd.read_json(sys.argv[1])
+    test_data.to_csv('/home/cyndyn/sfuhome/test.csv', index=False)
+    listing_id = test_data['listing_id']
+    test_data = data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','Doorman','No Fee','Pre-War','Dining Room', 'Balcony','SIMPLEX','LOWRISE','Garage','Reduced Fee','Furnished','LAUNDRY','Hardwood','Subway']]
+
     data = data.sample(n=140)
     X= data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','Doorman','No Fee','Pre-War','Dining Room', 'Balcony','SIMPLEX','LOWRISE','Garage','Reduced Fee','Furnished','LAUNDRY','Hardwood','Subway']]
     y = data['interest_level']
-    Nearest_Subway(data)
-    Distance_Downtown(data)
+    # Nearest_Subway(data)
+    # Distance_Downtown(data)
     Feature_Selection(data)
+    Logistic_Regression_kaggle(test_data, X, y, listing_id)
     # data.to_csv('testtesttest.csv', index=False)
     # Decision_Tree(data, X, y)
-    Logistic_Regression(X, y)
-    SVM(X, y)
+    # Logistic_Regression(X, y)
+    # SVM(X, y)
     # Nearest_Subway(data)
