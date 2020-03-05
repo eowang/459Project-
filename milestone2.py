@@ -8,56 +8,93 @@ from sklearn.model_selection import KFold
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import log_loss
 
-# DF2= pd.read_csv("subwayData.csv") 
-def Min_Euclidean_Dist(row):
-    data2['distance']= data2.apply(lambda x: np.square())
-    return np.linalg.norm(data1[cols].values - data2[cols].values,
-                   axis=1)
 
 def ndis(row, DF2):
-    try:
-        latitude,longitude=row['latitude'],row['longitude']
-        # print(DF2.latitude)
-        # DF2['DIS']=(DF2.latitude-latitude)*(DF2.latitude-latitude)+(DF2.longitude-longitude)*(DF2.longitude-longitude)
-        DF2['DIS']=DF2[['latitude', 'longitude']].sub(np.array([latitude,longitude])).pow(2).sum(1).pow(0.5)
-
-        print(DF2.DIS)
-        DF2.to_csv("sdfadsf", index=false)
-        # temp=DF2.ix[DF2.DIS.min()]
-        # return temp[2]  
-        return DF2.DIS.min()
-    except:
-        pass        
+ 
+    latitude,longitude=row['latitude'],row['longitude']
+   
+    DF2['latitude']= DF2['latitude'].astype(float)
+    DF2['longitude']= DF2['longitude'].astype(float)
     
 
-def Nearest_Subway(data):
-    subwayData= pd.read_csv("subwayData.csv")
-    # subwayData['coordinates'] = subwayData['the_geom'].str.split(' (').str[0]
+    DF2['DIS']=(DF2.latitude.sub(latitude).pow(2).add(DF2.longitude.sub(longitude).pow(2))).pow(.5)   
 
+    DF2.to_csv("sdfadsf.csv", index=False)
+
+    return DF2.DIS.min()
+
+def euclidDT(row):
+    dtLat = 40.7580
+    dtLong = -73.9855
+    
+    latitude,longitude =row['latitude'],row['longitude']
+
+    return pow((pow((dtLat-latitude),2) + pow((dtLong-longitude),2)),.5) 
+
+def Nearest_Subway(data):
+
+    subwayData= pd.read_csv("subwayData.csv")
 
     subwayData['longitude']= subwayData['the_geom'].apply(lambda st: st[st.find("(")+1:st.find("4")])
     subwayData['latitude']= subwayData['the_geom'].apply(lambda st: st[st.find(" 4")+1:st.find(")")])
     
     data['min_euc_dist']=data.apply(lambda x : ndis(x, subwayData), axis=1)
-    
-    data.to_csv('testtest.csv', index=False)
-    # distance_array = np.sum((data[xy].values - subwayData[xy].values)**2, axis=1)
-    # test = distance_array.argmin()
-    # print(test)
-    # distanceArray= Min_Euclidean_Dist(data,subwayData)
-    
-    # data.apply(lambda x: Min_Euclidean_Dist())
 
+    
+def Distance_Downtown(data): 
+    data['dist_dt']=data.apply(lambda x : euclidDT(x), axis=1)
 
-# def Feature_Selection(data):
+#Recursive feature elimination
+def recursiveFeature(X,y):
+    # feature extraction
+    X_scaled = preprocessing.scale(X)
+    model = LogisticRegression(solver='lbfgs',max_iter=2000)
+    rfe = RFE(model, 20)
+    fit = rfe.fit(X_scaled, y)
+    print("Num Features: %d" % fit.n_features_)
+    print("Selected Features: %s" % fit.support_)
+    print("Feature Ranking: %s" % fit.ranking_)
+
+def Feature_Selection(data):
+    data = data.drop(data.columns[[2,3,4,5,6,10,11,13,16]], axis=1)
+    
+    cols = list(data)
+    cols.insert(-1, cols.pop(cols.index('interest_level')))
+    cols.insert(-1, cols.pop(cols.index('dist_dt')))
+    data = data[cols]
+    data['longitude']= data['longitude'].abs()
+    data['Roof Deck']= data['Roof Deck'] | data['Roof-deck']
+    data['High Ceiling']= data['High Ceiling'] | data['High Ceilings'] |data['HIGH CEILINGS']
+    data['Renovated'] = data['Renovated'] | data['Newly renovated']
+    data['Live In Super'] = data['Live In Super'] | data['LIVE IN SUPER']
+    data['Gym/Fitness'] = data['Gym/Fitness'] | data['Fitness Center']
+    data.Pool = data.Pool | data['Swimming Pool']
+    data ['Hardwood'] = data.Hardwood | data.HARDWOOD | data['Hardwood Floors']
+    data['Outdoor Space'] = data['Outdoor Space'] | data['Common Outdoor Space'] | data['Private Outdoor Space'] | data['PublicOutdoor']
+    data['Elevator'] = data['elevator'] | data['Elevator'] 
+    data['LAUNDRY']= data['Laundry in Building'] | data['Laundry in Unit'] | data['Laundry In Building'] | data['Laundry Room'] | data['Laundry In Unit'] | data['LAUNDRY'] | data['On-site laundry'] | data['On-site Laundry'] | data['Washer/Dryer']
+    data['Pre-War'] = data['Pre-War'] | data['prewar'] | data['Prewar']
+    data['Pets on approval']= data['Pets on approval'] | data['Dogs Allowed'] | data['Cats Allowed']
+    data.dishwasher = data.Dishwasher | data.dishwasher
+    data.Garage = data.Garage | data['On-site Garage']
+    data.drop(['Dogs Allowed','Cats Allowed','LIVE IN SUPER','Newly renovated','Washer/Dryer','HIGH CEILINGS','High Ceilings','Swimming Pool','Roof-deck','On-site Garage','Common Outdoor Space','Private Outdoor Space', 'PublicOutdoor','elevator','HARDWOOD', 'Hardwood Floors', 'Laundry in Building','Laundry in Unit','Laundry In Building','Laundry Room','Laundry In Unit', 'On-site laundry', 'On-site Laundry','prewar','Prewar','Dishwasher'], axis = 1, inplace=True) 
+    
+  
+
+    # X = data.drop['interest_level']  #independent columns
+    # y = data['interest_level']   #target column i.e price range
+    # data.to_csv('test_data.csv', index=False)
+  
+    # recursiveFeature(X,y)
 
 # def Decision_Tree(data):
 
-def Logistic_Regression(data):
-    data = data.head(300)
+def Logistic_Regression(X, y):
+   
 
-    X = data.drop(['numeric_interest_level','interest_level', 'photos', 'description', 'features', 'listing_id', 'display_address', 'building_id', 'created', 'street_address', 'manager_id'], axis=1)
-    y = data['numeric_interest_level']
+    # X= data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','numeric_interest_level']]
+    # X = data.drop(['numeric_interest_level','interest_level', 'photos', 'description', 'features', 'listing_id', 'display_address', 'building_id', 'created', 'street_address', 'manager_id'], axis=1)
+    # y = data['numeric_interest_level']
     kf = KFold(n_splits = 5)
     scores = []
 
@@ -78,12 +115,9 @@ def Logistic_Regression(data):
     print("Scores are:", scores)
     print("Average score is:", avg_score)
 
-def SVM(data):
-    #remember to remove this later
-    data = data.head(300)
-
-    X = data.drop(['interest_level', 'photos', 'description', 'features', 'listing_id', 'display_address', 'building_id', 'created', 'street_address', 'manager_id'], axis=1)
-    y = data['interest_level']
+def SVM(X, y):
+    # X = data.drop(['interest_level', 'photos', 'description', 'features', 'listing_id', 'display_address', 'building_id', 'created', 'street_address', 'manager_id'], axis=1)
+    # y = data['interest_level']
     kf = KFold(n_splits = 5)
     scores = []
 
@@ -107,8 +141,14 @@ def SVM(data):
 if __name__ == '__main__':
     data = pd.read_csv('data_after_M1.csv')
     # data = pd.read_json(sys.argv[1])
-    # Feature_Selection(data)
-    # Decision_Tree(data)
-    # Logistic_Regression(data)
-    SVM(data)
+    data = data.sample(n=140)
+    X= data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','Doorman','No Fee','Pre-War','Dining Room', 'Balcony','SIMPLEX','LOWRISE','Garage','Reduced Fee','Furnished','LAUNDRY','Hardwood','Subway']]
+    y = data['interest_level']
+    Nearest_Subway(data)
+    Distance_Downtown(data)
+    Feature_Selection(data)
+    # data.to_csv('testtesttest.csv', index=False)
+    # Decision_Tree(data, X, y)
+    Logistic_Regression(X, y)
+    SVM(X, y)
     # Nearest_Subway(data)
