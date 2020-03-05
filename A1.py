@@ -135,21 +135,21 @@ def Exploratory_Data_Analysis(data):
     ##plot hour-wise listing trend and find top 5 busiest hours
     data['created'] = pd.to_datetime(data['created']) #double check that this converts AM/PM to 24hr time
     data['hour_created'] = data['created'].dt.hour
-    conversions = {'low':1,'medium':2,'high':3}
-    data['numeric_interest_level'] = data['interest_level'].map(conversions)
-    avg_interest_by_hour = data.groupby('hour_created', as_index=False)['numeric_interest_level'].mean()
-    plt.plot(avg_interest_by_hour['hour_created'], avg_interest_by_hour['numeric_interest_level'], 'b', alpha=0.5)
-    plt.title('Hour-Wise Listing Trend')
-    plt.xlabel('Hour')
-    plt.ylabel('Average Interest Level')
-    plt.show()
-    top_five_hours = avg_interest_by_hour.sort_values('numeric_interest_level').head(5)
-    print("the top 5 busiest hours of postings are:", top_five_hours['hour_created'].values.tolist())
+    # conversions = {'low':1,'medium':2,'high':3}
+    # data['numeric_interest_level'] = data['interest_level'].map(conversions)
+    # avg_interest_by_hour = data.groupby('hour_created', as_index=False)['numeric_interest_level'].mean()
+    # plt.plot(avg_interest_by_hour['hour_created'], avg_interest_by_hour['numeric_interest_level'], 'b', alpha=0.5)
+    # plt.title('Hour-Wise Listing Trend')
+    # plt.xlabel('Hour')
+    # plt.ylabel('Average Interest Level')
+    # plt.show()
+    # top_five_hours = avg_interest_by_hour.sort_values('numeric_interest_level').head(5)
+    # print("the top 5 busiest hours of postings are:", top_five_hours['hour_created'].values.tolist())
 
-    #Show proportion of target variable values
-    data['interest_level'].value_counts().plot(kind='bar')
-    plt.title('Proportion of Interest Levels')
-    plt.show()
+    # #Show proportion of target variable values
+    # data['interest_level'].value_counts().plot(kind='bar')
+    # plt.title('Proportion of Interest Levels')
+    # plt.show()
 
 def Image_Feature_Extraction(data):
     #plotting histograms
@@ -247,13 +247,16 @@ def hasFeature(word,row):
 
 
 if __name__ == '__main__':
-    data = pd.read_json(sys.argv[1])
+    # data = pd.read_json(sys.argv[1])
+    data= pd.read_json(sys.argv[1])
     # Missing_Values(data)
     # data = Outliers(data)
-    # Exploratory_Data_Analysis(data)
+    Exploratory_Data_Analysis(data)
     # Image_Feature_Extraction(data)
-    # Text_Feature_Extraction(data)
+    Text_Feature_Extraction(data)
     # data.to_csv('raw_data.csv', index=False)
-    nearestSubway(data)
+    data.to_csv('test_raw_data.csv', index=False)
+
+  
 
     
