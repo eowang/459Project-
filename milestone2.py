@@ -79,8 +79,6 @@ def Feature_Selection(data):
     data.Garage = data.Garage | data['On-site Garage']
     data.drop(['Dogs Allowed','Cats Allowed','LIVE IN SUPER','Newly renovated','Washer/Dryer','HIGH CEILINGS','High Ceilings','Swimming Pool','Roof-deck','On-site Garage','Common Outdoor Space','Private Outdoor Space', 'PublicOutdoor','elevator','HARDWOOD', 'Hardwood Floors', 'Laundry in Building','Laundry in Unit','Laundry In Building','Laundry Room','Laundry In Unit', 'On-site laundry', 'On-site Laundry','prewar','Prewar','Dishwasher'], axis = 1, inplace=True) 
     
-  
-
     # X = data.drop['interest_level']  #independent columns
     # y = data['interest_level']   #target column i.e price range
     # data.to_csv('test_data.csv', index=False)
@@ -88,11 +86,10 @@ def Feature_Selection(data):
     # recursiveFeature(X,y)
 
 def Decision_Tree(X, y):
-    kf = KFold(n_splits = 4)
+    log_scores = []
+    acc_scores = []
 
-    scores = []
-
-    KFold(n_splits=4, random_state=None, shuffle=False)
+    kf = KFold(n_splits = 5)
 
     dec_Tree_class = DecisionTreeClassifier(criterion='entropy')
 
@@ -100,15 +97,17 @@ def Decision_Tree(X, y):
         X_train, X_valid = X.iloc[train_index], X.iloc[test_index]
         y_train, y_valid = y.iloc[train_index], y.iloc[test_index]
 
-    dec_Tree_class = dec_Tree_class.fit(X_train, y_train)
-    
-    pred_prob = dec_Tree_class.predict_proba(X_valid)
-    scores.append(log_loss(y_valid, pred_prob))
+        dec_Tree_class = dec_Tree_class.fit(X_train, y_train)
+        
+        pred_prob = dec_Tree_class.predict_proba(X_valid)
+        log_scores.append(log_loss(y_valid, pred_prob))
+        acc_scores.append(dec_Tree_class.score(X_valid, y_valid))
 
-    avg_score = statistics.mean(scores)
+    avg_log_score = statistics.mean(log_scores)
+    avg_acc_score = statistics.mean(acc_scores)
     print("\n\nDecision tree scores:")
-    print("Scores are:", scores)
-    print("Average score is:", avg_score)
+    print("Average log loss score:", avg_log_score)
+    print("Average accuracy score:", avg_acc_score)
 
 
 def Decision_tree_kaggle(test_data, X, y, listing_id):
@@ -125,15 +124,13 @@ def Decision_tree_kaggle(test_data, X, y, listing_id):
 
     df_predict_proba = df_predict_proba[col_names]
     df_predict_proba= df_predict_proba.dropna()
-    df_predict_proba.to_csv('kaggle_submission_TREE.csv')
+    df_predict_proba.to_csv('kaggle_submission_TREE.csv', index=False)
 
 
 def Logistic_Regression_score(X, y):
-    # X= data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','numeric_interest_level']]
-    # X = data.drop(['numeric_interest_level','interest_level', 'photos', 'description', 'features', 'listing_id', 'display_address', 'building_id', 'created', 'street_address', 'manager_id'], axis=1)
-    # y = data['numeric_interest_level']
+    log_scores = []
+    acc_scores = []
     kf = KFold(n_splits = 5)
-    scores = []
 
     KFold(n_splits=2, random_state=None, shuffle=False)
 
@@ -146,17 +143,16 @@ def Logistic_Regression_score(X, y):
         logistic_model.fit(X_train, y_train)
 
         predicted_prob = logistic_model.predict_proba(X_valid)
-        # scores.append(log_loss(y_valid, predicted_prob))
-        # scores.append(f1_score(y_valid, predicted_prob, average="macro"))
+        log_scores.append(log_loss(y_valid, pred_prob))
+        acc_scores.append(logistic_model.score(X_valid, y_valid))
 
-
-    avg_score = statistics.mean(scores)
+    avg_log_score = statistics.mean(log_scores)
+    avg_acc_score = statistics.mean(acc_scores)
     print("\n\nLogistic regression score:")
-    print("Scores are:", scores)
-    print("Average score is:", avg_score)
+    print("Average log loss score:", avg_log_score)
+    print("Average accuracy score:", avg_acc_score)
 
     # predicted = logistic_model.predict_proba(test_data)
-    
 
 def Logistic_Regression_kaggle(test_data, X, y, listing_id):
     logistic_model = LogisticRegression()
@@ -175,14 +171,12 @@ def Logistic_Regression_kaggle(test_data, X, y, listing_id):
     df_predict_proba = df_predict_proba[col_names]
     print(df_predict_proba.shape)
     df_predict_proba= df_predict_proba.dropna()
-    df_predict_proba.to_csv('kaggle_submission_LR.csv')
-    
+    df_predict_proba.to_csv('kaggle_submission_LR.csv', index=False)
 
 def SVM_score(X, y):
-    # X = data.drop(['interest_level', 'photos', 'description', 'features', 'listing_id', 'display_address', 'building_id', 'created', 'street_address', 'manager_id'], axis=1)
-    # y = data['interest_level']
+    log_scores = []
+    acc_scores = []
     kf = KFold(n_splits = 5)
-    scores = []
 
     # KFold(n_splits=2, random_state=None, shuffle=False)
 
@@ -195,15 +189,14 @@ def SVM_score(X, y):
         svm_model.fit(X_train, y_train)
 
         predicted_prob = svm_model.predict_proba(X_valid)
-        # scores.append(log_loss(y_valid, predicted_prob))
-
+        log_scores.append(log_loss(y_valid, pred_prob))
+        acc_scores.append(svm_model.score(X_valid, y_valid))
         
-        scores.append(f1_score(y_valid, predicted_prob, average="macro"))
-        
-    avg_score = statistics.mean(scores)
+    avg_log_score = statistics.mean(log_scores)
+    avg_acc_score = statistics.mean(acc_scores)
     print("\n\nSVM scores: ")
-    print("Scores are:", scores)
-    print("Average score is:", avg_score)
+    print("Average log loss score:", avg_log_score)
+    print("Average accuracy score:", avg_acc_score)
 
     
 def SVM_kaggle(test_data, X, y, listing_id):
@@ -220,7 +213,7 @@ def SVM_kaggle(test_data, X, y, listing_id):
 
     df_predict_proba = df_predict_proba[col_names]
     df_predict_proba= df_predict_proba.dropna()
-    df_predict_proba.to_csv('kaggle_submission_SVM.csv')
+    df_predict_proba.to_csv('kaggle_submission_SVM.csv', index=False)
     
 
 if __name__ == '__main__':
