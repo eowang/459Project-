@@ -142,7 +142,7 @@ def Logistic_Regression_score(X, y):
         logistic_model = LogisticRegression()
         logistic_model.fit(X_train, y_train)
 
-        predicted_prob = logistic_model.predict_proba(X_valid)
+        pred_prob = logistic_model.predict_proba(X_valid)
         log_scores.append(log_loss(y_valid, pred_prob))
         acc_scores.append(logistic_model.score(X_valid, y_valid))
 
@@ -185,10 +185,13 @@ def SVM_score(X, y):
         X_train, X_valid = X.iloc[train_index], X.iloc[test_index]
         y_train, y_valid = y.iloc[train_index], y.iloc[test_index]
 
-        svm_model = SVC(kernel='linear', probability=True, max_iter=10)
+        svm_model = make_pipeline(
+            SVC(kernel='linear', probability=True, max_iter=10)
+
+            )
         svm_model.fit(X_train, y_train)
 
-        predicted_prob = svm_model.predict_proba(X_valid)
+        pred_prob = svm_model.predict_proba(X_valid)
         log_scores.append(log_loss(y_valid, pred_prob))
         acc_scores.append(svm_model.score(X_valid, y_valid))
         
