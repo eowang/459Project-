@@ -2,6 +2,13 @@ import pandas as pd
 import sys
 import matplotlib.pyplot as plt 
 import numpy as np
+import statistics
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import KFold
+from sklearn.metrics import log_loss
+
 
 # DF2= pd.read_csv("subwayData.csv")
 def Min_Euclidean_Dist(row):
@@ -46,17 +53,82 @@ def Nearest_Subway(data):
 
 # def Feature_Selection(data):
 
-# def Decision_Tree(data):
+def Decision_Tree(data):
+    #'features'
+    #col_names = ['interest_level',	'hour_created',	'numeric_interest_level',	'word_count',	'Elevator',	'Hardwood Floors',	'Cats Allowed',	'Dogs Allowed',	'Doorman',	'Dishwasher',	'No Fee	Laundry in Building	Fitness Center',	'Pre-War',	'Laundry in Unit',	'Roof Deck',	'Outdoor Space',	'Dining Room',	'High Speed Internet',	'Balcony',	'Swimming Pool',	'Laundry In Building',	'New Construction',	'Terrace',	'Exclusive	Loft',	'Garden/Patio',	'Wheelchair Access',	'Common Outdoor Space',	'HARDWOOD',	'Fireplace',	'SIMPLEX',	'prewar',	'LOWRISE',	'Garage	Laundry Room',	'Reduced Fee',	'Laundry In Unit',	'Furnished',	'Multi-Level',	'Private Outdoor Space',	'Prewar	PublicOutdoor',	'Parking Space',	'Roof-deck',	'dishwasher',	'High Ceilings',	'elevator',	'Renovated',	'Pool',	'LAUNDRY',	'Green Building',	'HIGH CEILINGS',	'LIVE IN SUPER',	'High Ceiling',	'Washer in Unit',	'Dryer in Unit',	'Storage',	'Stainless Steel Appliances',	'On-site laundry',	'Concierge',	'Newly renovated',	'On-site Laundry',	'Hardwood',	'Light',	'Live In Super',	'On-site Garage', 'Washer/Dryer',	'Granite Kitchen',	'Gym/Fitness',	'Pets on approval',	'Marble', 'Bath',	'Walk in Closet(s)',	'Subway']
+    # col_names = ['longitude', 'latitude', 'bedrooms', 'bathrooms']   
+    # data.head(5000)
+
+    # X = data[col_names].sample(n=300)
+
+    # y = data.numeric_interest_level.sample(n=300)
+
+    # X_train, X_test, y_train, y_test, = cross_validation.train_test_split(X, y, test_size=0.3, random_state=0)
+
+    # dec_Tree_class = DecisionTreeClassifier()
+
+    # dec_Tree_class = dec_Tree_class.fit(X_train, y_train)
+
+    # y_pred = dec_Tree_class.predict(X_test)
+
+    # scores = cross_val_score(dec_Tree_class, X, y, cv = 5)
+
+    # print("Accuracy:", scores.mean(), scores.std() * 2)
+    # print("Accuracy:", dec_Tree_class.accuracy.score(y_test, y_pred))
+
+
+    
+
+# KFOLD IMPLEMENTATION
+#   col_names = ['interest_level',	'hour_created',	'numeric_interest_level',	'word_count',	'Elevator',	'Hardwood Floors',	'Cats Allowed',	'Dogs Allowed',	'Doorman',	'Dishwasher',	'No Fee	Laundry in Building	Fitness Center',	'Pre-War',	'Laundry in Unit',	'Roof Deck',	'Outdoor Space',	'Dining Room',	'High Speed Internet',	'Balcony',	'Swimming Pool',	'Laundry In Building',	'New Construction',	'Terrace',	'Exclusive	Loft',	'Garden/Patio',	'Wheelchair Access',	'Common Outdoor Space',	'HARDWOOD',	'Fireplace',	'SIMPLEX',	'prewar',	'LOWRISE',	'Garage	Laundry Room',	'Reduced Fee',	'Laundry In Unit',	'Furnished',	'Multi-Level',	'Private Outdoor Space',	'Prewar	PublicOutdoor',	'Parking Space',	'Roof-deck',	'dishwasher',	'High Ceilings',	'elevator',	'Renovated',	'Pool',	'LAUNDRY',	'Green Building',	'HIGH CEILINGS',	'LIVE IN SUPER',	'High Ceiling',	'Washer in Unit',	'Dryer in Unit',	'Storage',	'Stainless Steel Appliances',	'On-site laundry',	'Concierge',	'Newly renovated',	'On-site Laundry',	'Hardwood',	'Light',	'Live In Super',	'On-site Garage', 'Washer/Dryer',	'Granite Kitchen',	'Gym/Fitness',	'Pets on approval',	'Marble', 'Bath',	'Walk in Closet(s)',	'Subway']
+    col_names = ['longitude', 'latitude', 'bedrooms', 'bathrooms']   
+    data.head(5000)
+
+    X = data[col_names].sample(n=300)
+
+    y = data.numeric_interest_level.sample(n=300)
+# 
+
+    kf = KFold(n_splits = 4)
+
+    scores = []
+
+    KFold(n_splits=4, random_state=None, shuffle=False)
+
+    dec_Tree_class = DecisionTreeClassifier()
+
+    for train_index, test_index in kf.split(X):
+        X_train, X_valid = X.iloc[train_index], X.iloc[test_index]
+        y_train, y_valid = y.iloc[train_index], y.iloc[test_index]
+
+    dec_Tree_class = dec_Tree_class.fit(X_train, y_train)
+    
+    pred_prob = dec_Tree_class.predict_proba(X_valid)
+    scores.append(log_loss(y_valid, pred_prob))
+
+    avg_score = statistics.mean(scores)
+    print("Scores are:", scores)
+    print("Average score is:", avg_score) 
+
+# 
+# 
+# 
+
+
 
 # def Logistic_Regression(data):
 
 # def SVM(data):
 
 if __name__ == '__main__':
-    data = pd.read_csv('raw_data.csv')
+    data = pd.read_csv(sys.argv[1])
+
+    # print(data.head(n=300))
+    # print(type(data.iloc[:300]))
+    # print(type(data.numeric_interest_level[1]))
 	# data = pd.read_json(sys.argv[1])
 	# Feature_Selection(data)
-	# Decision_Tree(data)
+    Decision_Tree(data)
 	# Logistic_Regression(data)
 	# SVM(data)
-    Nearest_Subway(data)
+    # Nearest_Subway(data)
