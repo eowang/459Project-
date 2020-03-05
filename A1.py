@@ -2,7 +2,7 @@ import pandas as pd
 import sys
 import matplotlib.pyplot as plt
 from collections import Counter
-import cv2
+# import cv2
 import numpy as np
 
 
@@ -58,7 +58,7 @@ def Missing_Values(data):
     print(total_missing)
 
 def Outliers(data):
-    #box plot of numeric values to find outliers
+    # box plot of numeric values to find outliers
     plt.boxplot(data['bathrooms'], notch=True, vert=False)
     plt.title('box plot of number of bathrooms')
     plt.show()
@@ -238,6 +238,7 @@ def Text_Feature_Extraction(data):
     for word in top_words:
         data[word] = data['features'].apply(lambda x:hasFeature(word,x))
     
+    return data
     
 
 def hasFeature(word,row):
@@ -247,13 +248,16 @@ def hasFeature(word,row):
 
 
 if __name__ == '__main__':
+    #run with python3 A1.py train.json
     data = pd.read_json(sys.argv[1])
-    # Missing_Values(data)
-    # data = Outliers(data)
+    Missing_Values(data)
+    data = Outliers(data)
     # Exploratory_Data_Analysis(data)
     # Image_Feature_Extraction(data)
-    # Text_Feature_Extraction(data)
-    # data.to_csv('raw_data.csv', index=False)
-    nearestSubway(data)
+    dataTextfeatures = Text_Feature_Extraction(data)
+    data.to_csv('data_after_M1.csv', index=False)
+
+    dataTextfeatures.to_csv('data_text_features.csv', index=False)
+    
 
     
