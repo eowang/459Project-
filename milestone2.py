@@ -6,6 +6,7 @@ import statistics
 from sklearn.svm import SVC
 from sklearn.model_selection import KFold
 from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import log_loss, f1_score, confusion_matrix
 
 
