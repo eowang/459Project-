@@ -269,17 +269,41 @@ if __name__ == '__main__':
     print("After dropping:", test_data.shape)
     # data = data.sample(n=140)
     X= data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','Doorman','No Fee','Pre-War','Dining Room', 'Balcony','SIMPLEX','LOWRISE','Garage','Reduced Fee','Furnished','LAUNDRY','Hardwood']]
+    
+    #With nearest subway feature
+    Nearest_Subway(data)
+    Nearest_Subway(test_data)
+    X_Subway = data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','Doorman','No Fee','Pre-War','Dining Room', 'Balcony','SIMPLEX','LOWRISE','Garage','Reduced Fee','Furnished','LAUNDRY','Hardwood','min_euc_dist']]
+    
+
+    #With distance to dt feature
+    Distance_Downtown(data)
+    Distance_Downtown(test_data)
+    X_DT =  data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','Doorman','No Fee','Pre-War','Dining Room', 'Balcony','SIMPLEX','LOWRISE','Garage','Reduced Fee','Furnished','LAUNDRY','Hardwood','dist_dt']]
 
     y = data['interest_level']
+    
+
     # Nearest_Subway(data)
     # Distance_Downtown(data)
 
-    
+    #Kaggle tests on default features 
     Decision_tree_kaggle(test_data, X, y, listing_id)
     # Logistic_Regression_kaggle(test_data, X, y, listing_id)
-    SVM_kaggle(test_data, X, y, listing_id)
+    # SVM_kaggle(test_data, X, y, listing_id)
+
+    #Kaggle tests with nearest subway feature 
+    #  Decision_tree_kaggle(test_data, X_Subway, y, listing_id)
+    # Logistic_Regression_kaggle(test_data, X_Subway, y, listing_id)
+    # SVM_kaggle(test_data, X_Subway, y, listing_id)
+
+    #Kaggle tests with distance to dt feature
+    #  Decision_tree_kaggle(test_data, X_DT, y, listing_id)
+    # Logistic_Regression_kaggle(test_data, X_DT, y, listing_id)
+    # SVM_kaggle(test_data, X_DT, y, listing_id)
+
     # data.to_csv('testtesttest.csv', index=False)
     # Decision_Tree(data, X, y)
     # Logistic_Regression_score(X, y)
     # SVM_score(X, y)
-    # Nearest_Subway(data)
+  
