@@ -9,6 +9,8 @@ from sklearn.model_selection import KFold
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import log_loss, f1_score, confusion_matrix
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 
 
 def ndis(row, DF2):
@@ -190,9 +192,9 @@ def SVM_score(X, y):
         y_train, y_valid = y.iloc[train_index], y.iloc[test_index]
 
         svm_model = make_pipeline(
-            SVC(kernel='linear', probability=True, max_iter=10)
-
-            )
+                          StandardScaler(),
+                          SVC(gamma='auto', probability=True, max_iter=10)
+                          )
         svm_model.fit(X_train, y_train)
 
         pred_prob = svm_model.predict_proba(X_valid)
@@ -207,7 +209,11 @@ def SVM_score(X, y):
 
     
 def SVM_kaggle(test_data, X, y, listing_id):
-    svm_model = SVC(kernel='linear', probability=True, max_iter=10)
+    svm_model = make_pipeline(
+                          StandardScaler(),
+                          SVC(gamma='auto', probability=True, max_iter=10)
+                          )
+
     svm_model.fit(X, y)
 
     predicted = svm_model.predict_proba(test_data)
@@ -223,8 +229,6 @@ def SVM_kaggle(test_data, X, y, listing_id):
     df_predict_proba['listing_id'] = listing_id
 
     col_names = ['listing_id', 'high', 'medium', 'low']
-
-    
 
     df_predict_proba = df_predict_proba[col_names]
     
@@ -249,6 +253,7 @@ def Text_Feature_Extraction(data):
     data.to_csv('raw_data.csv', index=False)
     for word in top_words:
         data[word] = data['features'].apply(lambda x:hasFeature(word,x))
+        
 def hasFeature(word,row):
     if word in row: 
         return 1 
@@ -291,9 +296,9 @@ if __name__ == '__main__':
     # Distance_Downtown(data)
 
     #Kaggle tests on default features 
-    Decision_tree_kaggle(test_data, X, y, listing_id)
+    # Decision_tree_kaggle(test_data, X, y, listing_id)
     # Logistic_Regression_kaggle(test_data, X, y, listing_id)
-    # SVM_kaggle(test_data, X, y, listing_id)
+    SVM_kaggle(test_data, X, y, listing_id)
 
     #Kaggle tests with nearest subway feature 
     #  Decision_tree_kaggle(test_data, X_Subway, y, listing_id)
