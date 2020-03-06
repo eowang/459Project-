@@ -189,7 +189,10 @@ def SVM_score(X, y):
         X_train, X_valid = X.iloc[train_index], X.iloc[test_index]
         y_train, y_valid = y.iloc[train_index], y.iloc[test_index]
 
-        svm_model = SVC(kernel='linear', probability=True, max_iter=10)
+        svm_model = make_pipeline(
+            SVC(kernel='linear', probability=True, max_iter=10)
+
+            )
         svm_model.fit(X_train, y_train)
 
         pred_prob = svm_model.predict_proba(X_valid)
