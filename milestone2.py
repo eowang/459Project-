@@ -284,7 +284,7 @@ if __name__ == '__main__':
     # Distance_Downtown(test_data)
     # X_DT =  data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','Doorman','No Fee','Pre-War','Dining Room', 'Balcony','SIMPLEX','LOWRISE','Garage','Reduced Fee','Furnished','LAUNDRY','Hardwood','dist_dt']]
 
-    # y = data['interest_level']
+    y = data['interest_level']
     
     #SCORE
     Decision_tree_score(X,y)
