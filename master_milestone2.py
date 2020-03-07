@@ -102,33 +102,47 @@ def Decision_Tree(X,y):
 #
     kf = KFold(n_splits = 5)
 
-    scores = []
+    log_scores = []
+    acc_scores = []
+
+    log_overfit_scores = []
+    acc_overfit_scores = []
+
 
     KFold(n_splits=5, random_state=None, shuffle=False)
 
-    dec_Tree_class = DecisionTreeClassifier(criterion='entropy', max_depth=5)
+    dec_Tree_class = DecisionTreeClassifier(criterion='entropy')
 
     for train_index, test_index in kf.split(X):
         X_train, X_valid = X.iloc[train_index], X.iloc[test_index]
         y_train, y_valid = y.iloc[train_index], y.iloc[test_index]
-        dec_Tree_class = dec_Tree_class.fit(X_train, y_train)
-        pred_prob = dec_Tree_class.predict_proba(X_valid)
         
-        scores.append(log_loss(y_valid, pred_prob))
+        dec_Tree_class = dec_Tree_class.fit(X_train, y_train)
+        
+        pred_prob = dec_Tree_class.predict_proba(X_valid)
+        log_scores.append(log_loss(y_valid, pred_prob))
+        acc_scores.append(dec_Tree_class.score(X_valid, y_valid))
         
         #Model validation on X_train to test if model is overfitting.
         # Predicted proba(X_train) provides predicted prob on X_train so we can input it into log_loss function.
         xtrain_error_prob= dec_Tree_class.predict_proba(X_train)
-        
-        log_overfit_scores.append(log_loss(X_train, xtrain_error_prob))
+        #Add results into overfit metric array
+        log_overfit_scores.append(log_loss(y_train, xtrain_error_prob))
         acc_overfit_scores.append(dec_Tree_class.score(X_train, y_train))
 
-        avgOverfit_log_score = statistics.mean(log_overfit_scores)
-        avgOverfit_acc_score = statistics.mean(acc_overfit_scores)
-
-    avg_score = statistics.mean(scores)
-    print("Scores are:", scores)
-    print("Average score is:", avg_score) 
+    #Average out the overfit metric scores
+    avgOverfit_log_score = statistics.mean(log_overfit_scores)
+    avgOverfit_acc_score = statistics.mean(acc_overfit_scores)
+    
+    avg_log_score = statistics.mean(log_scores)
+    avg_acc_score = statistics.mean(acc_scores)
+    print("\n\nDecision Tree scores: ")
+    print("Average log loss score on y_valid:", avg_log_score)
+    print("Average accuracy score y_valid:", avg_acc_score)
+    #Overfitting metrics printed
+    print("Average overfit log loss score on y_train:", avgOverfit_log_score)
+    print("Average overfit accuracy score on y_train:", avgOverfit_acc_score)
+    
     
 #    
 # Attempt at writing Decision Tree with cross_validation.train_test_split
@@ -238,8 +252,13 @@ def SVM_score(X, y):
     # X = data.drop(['interest_level', 'photos', 'description', 'features', 'listing_id', 'display_address', 'building_id', 'created', 'street_address', 'manager_id'], axis=1)
     # y = data['interest_level']
     start_time = time.time()
+    
     log_scores = []
     acc_scores = []
+
+    log_overfit_scores = []
+    acc_overfit_scores = []
+
     kf = KFold(n_splits = 5)
     
     KFold(n_splits=2, random_state=None, shuffle=False)
@@ -256,11 +275,27 @@ def SVM_score(X, y):
         log_scores.append(log_loss(y_valid, predicted_prob))
         acc_scores.append(svm_model.score(X_valid, y_valid))
 
+        #Model validation on X_train to test if model is overfitting.
+        # Predicted proba(X_train) provides predicted prob on X_train so we can input it into log_loss function.
+        xtrain_error_prob= svm_model.predict_proba(X_train)
+        #Add results into overfit metric array
+        log_overfit_scores.append(log_loss(y_train, xtrain_error_prob))
+        acc_overfit_scores.append(svm_model.score(X_train, y_train))
+
+    #Average out the overfit metric scores
+    avgOverfit_log_score = statistics.mean(log_overfit_scores)
+    avgOverfit_acc_score = statistics.mean(acc_overfit_scores)
+
     avg_log_score = statistics.mean(log_scores)
     avg_acc_score = statistics.mean(acc_scores)
     print("\n\nSVM scores: ")
     print("Average log loss score:", avg_log_score)
     print("Average accuracy score:", avg_acc_score)
+
+    #Overfitting metrics printed
+    print("Average overfit log loss score on y_train:", avgOverfit_log_score)
+    print("Average overfit accuracy score on y_train:", avgOverfit_acc_score)
+
 
     print("run time of SVM", time.time() - start_time)
 
@@ -321,7 +356,7 @@ if __name__ == '__main__':
     #
     #Classifiers
     #
-    Decision_Tree(X,y)
-    # SVM_score(X, y)
+    # Decision_Tree(X,y)
+    SVM_score(X, y)
     # Logistic_Regression_score(X, y)
     # Nearest_Subway(data)
