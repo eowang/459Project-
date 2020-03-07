@@ -109,7 +109,7 @@ def Decision_Tree(X,y):
     acc_overfit_scores = []
 
 
-    KFold(n_splits=5, random_state=None, shuffle=False)
+    KFold(n_splits=2, random_state=None, shuffle=False)
 
     dec_Tree_class = DecisionTreeClassifier(criterion='entropy')
 
@@ -206,6 +206,9 @@ def Logistic_Regression_score(X, y):
     # y = data['numeric_interest_level']
     log_scores = []
     acc_scores = []
+
+    log_overfit_scores = []
+    acc_overfit_scores = []
     
     kf = KFold(n_splits = 5)
 
@@ -223,11 +226,28 @@ def Logistic_Regression_score(X, y):
         log_scores.append(log_loss(y_valid, predicted_prob))
         acc_scores.append(log_loss(y_valid, predicted_prob))
 
+        #Model validation on X_train to test if model is overfitting.
+        # Predicted proba(X_train) provides predicted prob on X_train so we can input it into log_loss function.
+        xtrain_error_prob= logistic_model.predict_proba(X_train)
+        #Add results into overfit metric array
+        log_overfit_scores.append(log_loss(y_train, xtrain_error_prob))
+        acc_overfit_scores.append(logistic_model.score(X_train, y_train))
+
+    #Average out the overfit metric scores
+    avgOverfit_log_score = statistics.mean(log_overfit_scores)
+    avgOverfit_acc_score = statistics.mean(acc_overfit_scores)
+
     avg_log_score = statistics.mean(log_scores)
     avg_acc_score = statistics.mean(acc_scores)
     print("\n\nLogistic regression score:")
     print("Average log loss score:", avg_log_score)
     print("Average accuracy score is:", avg_acc_score)
+
+    #Overfitting metrics printed
+    print("Average overfit log loss score on y_train:", avgOverfit_log_score)
+    print("Average overfit accuracy score on y_train:", avgOverfit_acc_score)
+
+
 
 def Logistic_Regression_kaggle(test_data, X, y, listing_id):
     logistic_model = LogisticRegression()
@@ -268,7 +288,7 @@ def SVM_score(X, y):
         X_train, X_valid = X.iloc[train_index], X.iloc[test_index]
         y_train, y_valid = y.iloc[train_index], y.iloc[test_index]
 
-        svm_model = SVC(C=1, max_iter=100, kernel='rbf', probability=True, gamma='auto')
+        svm_model = SVC(C=100, max_iter=100, kernel='linear', probability=True, gamma='auto')
         svm_model.fit(X_train, y_train)
 
         predicted_prob = svm_model.predict_proba(X_valid)
@@ -356,7 +376,7 @@ if __name__ == '__main__':
     #
     #Classifiers
     #
-    # Decision_Tree(X,y)
-    SVM_score(X, y)
+    Decision_Tree(X,y)
+    # SVM_score(X, y)
     # Logistic_Regression_score(X, y)
     # Nearest_Subway(data)
