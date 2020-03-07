@@ -9,6 +9,10 @@ from sklearn.model_selection import KFold
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import log_loss, f1_score, confusion_matrix
+from sklearn.pipeline import Pipeline 
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import GridSearchCV
+from sklearn.pipeline import make_pipeline
 
 
 def ndis(row, DF2):
@@ -77,12 +81,6 @@ def Feature_Selection(data):
     
   
 
-    # X = data.drop['interest_level']  #independent columns
-    # y = data['interest_level']   #target column i.e price range
-    # data.to_csv('test_data.csv', index=False)
-  
-    # recursiveFeature(X,y)
-
 
 def Decision_tree_score(X, y):
     log_scores = []
@@ -90,7 +88,7 @@ def Decision_tree_score(X, y):
 
     kf = KFold(n_splits = 5)
 
-    dec_Tree_class = DecisionTreeClassifier()
+    dec_Tree_class = DecisionTreeClassifier(criterion='entropy', max_depth=5)
 
     for train_index, test_index in kf.split(X):
         X_train, X_valid = X.iloc[train_index], X.iloc[test_index]
@@ -110,7 +108,7 @@ def Decision_tree_score(X, y):
 
 
 def Decision_tree_kaggle(test_data, X, y, listing_id):
-    tree_model = DecisionTreeClassifier()
+    tree_model = DecisionTreeClassifier(criterion='entropy', max_depth=5)
     tree_model.fit(X, y)
 
     predicted = tree_model.predict_proba(test_data)
@@ -126,7 +124,7 @@ def Decision_tree_kaggle(test_data, X, y, listing_id):
 
     df_predict_proba = df_predict_proba[col_names]
     
-    df_predict_proba.to_csv('kaggle_submission_TREE.csv', index=False)
+    df_predict_proba.to_csv('kaggle_submission_TREE_DT.csv', index=False)
 
 
 def Logistic_Regression_score(X, y):
@@ -136,13 +134,38 @@ def Logistic_Regression_score(X, y):
 
     KFold(n_splits=2, random_state=None, shuffle=False)
 
+
     for train_index, test_index in kf.split(X):
-        #print('TRAIN:', train_index, 'TEST:', test_index)
+        
         X_train, X_valid = X.iloc[train_index], X.iloc[test_index]
         y_train, y_valid = y.iloc[train_index], y.iloc[test_index]
         print(y_train)
-        logistic_model = LogisticRegression()
+        logistic_model = LogisticRegression(max_iter=10000, fit_intercept=True, C=464.15888336127773, warm_start=True)
+
         logistic_model.fit(X_train, y_train)
+
+        ###Code for running GridSearchCV######
+
+        # logistic= LogisticRegression(C=464.15888336127773)
+        # warm_start = [True, False]
+        # solver=['newton-cg', 'lbfgs', 'liblinear', 'sag', 'saga']
+        # fit_intercept = [True, False]
+        # multi_class = ['auto','ovr','multinomial']
+        # penalty = ['l1', 'l2']
+        # C = np.logspace(0, 4, 10)
+        # class_weight =['balanced', None]
+        # hyperparameters = dict(fit_intercept=[True,False], max_iter=[10000, 5000,15000], warm_start=[True,False],C=C,penalty=penalty)
+        # hyperparameters = dict(warm_start=warm_start)
+
+
+        # clf = GridSearchCV(logistic, hyperparameters, cv=5, verbose=0)
+        # best_model = clf.fit(X_train, y_train)
+
+        # print('Best Fit Intercept:', best_model.best_estimator_.get_params()['fit_intercept'])
+        # print('Best max_iter:', best_model.best_estimator_.get_params()['max_iter'])
+        # print('Best warm_start:', best_model.best_estimator_.get_params()['warm_start'])
+   
+
 
         pred_prob = logistic_model.predict_proba(X_valid)
         log_scores.append(log_loss(y_valid, pred_prob))
@@ -157,7 +180,7 @@ def Logistic_Regression_score(X, y):
     # predicted = logistic_model.predict_proba(test_data)
 
 def Logistic_Regression_kaggle(test_data, X, y, listing_id):
-    logistic_model = LogisticRegression(max_iter=10000)
+    logistic_model = LogisticRegression(max_iter=8000, fit_intercept=True, C=464.15888336127773, warm_start=True)
     logistic_model.fit(X, y)
    
     predicted = logistic_model.predict_proba(test_data)
@@ -175,7 +198,7 @@ def Logistic_Regression_kaggle(test_data, X, y, listing_id):
     df_predict_proba = df_predict_proba[col_names]
     
     
-    df_predict_proba.to_csv('kaggle_submission_LR.csv', index=False)
+    df_predict_proba.to_csv('kaggle_submission_LR_Subway.csv', index=False)
 
 def SVM_score(X, y):
     log_scores = []
@@ -189,9 +212,7 @@ def SVM_score(X, y):
         X_train, X_valid = X.iloc[train_index], X.iloc[test_index]
         y_train, y_valid = y.iloc[train_index], y.iloc[test_index]
 
-        svm_model = make_pipeline(
-            SVC(kernel='linear', probability=True, max_iter=10)
-
+        svm_model = make_pipeline(SVC(kernel='rbf', gamma='auto', probability=True, max_iter=100)
             )
         svm_model.fit(X_train, y_train)
 
@@ -207,7 +228,8 @@ def SVM_score(X, y):
 
     
 def SVM_kaggle(test_data, X, y, listing_id):
-    svm_model = SVC(kernel='linear', probability=True, max_iter=10)
+    svm_model = SVC(kernel='rbf', gamma='auto', probability=True, max_iter=100)
+    
     svm_model.fit(X, y)
 
     predicted = svm_model.predict_proba(test_data)
@@ -224,11 +246,9 @@ def SVM_kaggle(test_data, X, y, listing_id):
 
     col_names = ['listing_id', 'high', 'medium', 'low']
 
-    
-
     df_predict_proba = df_predict_proba[col_names]
     
-    df_predict_proba.to_csv('kaggle_submission_SVM.csv', index=False)
+    df_predict_proba.to_csv('kaggle_submission_SVM_DT.csv', index=False)
 
 def Exploratory_Data_Analysis(data):
 
@@ -266,11 +286,10 @@ if __name__ == '__main__':
     listing_id = test_data['listing_id']
 
     print("Listing Id shape:", listing_id.shape)
-    # test_data =data.drop(data.columns[[0,3,4,5,6,7,9,11,12,14]])
+    
     test_data = test_data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','Doorman','No Fee','Pre-War','Dining Room', 'Balcony','SIMPLEX','LOWRISE','Garage','Reduced Fee','Furnished','LAUNDRY','Hardwood']]
 
     print("After dropping:", test_data.shape)
-    # data = data.sample(n=140)
     X= data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','Doorman','No Fee','Pre-War','Dining Room', 'Balcony','SIMPLEX','LOWRISE','Garage','Reduced Fee','Furnished','LAUNDRY','Hardwood']]
     
     #With nearest subway feature
@@ -287,13 +306,13 @@ if __name__ == '__main__':
     y = data['interest_level']
     
     #SCORE
-    Decision_tree_score(X,y)
+    # Decision_tree_score(X,y)
     # Logistic_Regression_score(X, y)
     # SVM_score(X,y)
 
     #KAGGLE
     Decision_tree_kaggle(test_data, X, y, listing_id)
-    # Logistic_Regression_kaggle(test_data, X, y, listing_id)
-    # SVM_kaggle(test_data, X, y, listing_id)
+    Logistic_Regression_kaggle(test_data, X, y, listing_id)
+    SVM_kaggle(test_data, X, y, listing_id)
 
   
