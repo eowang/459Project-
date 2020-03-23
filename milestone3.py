@@ -12,6 +12,9 @@ from sklearn.metrics import log_loss, f1_score, confusion_matrix
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.model_selection import GridSearchCV
+from matplotlib.legend_handler import HandlerLine2D
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import roc_curve, auc
 
 
 def ndis(row, DF2):
@@ -237,25 +240,56 @@ def SVM_kaggle(test_data, X, y, listing_id):
     df_predict_proba.to_csv('kaggle_submission_SVM.csv', index=False)
 
 def Gradient_Param_Tuning(X, y):
-    gradient = GradientBoostingClassifier()
-    learning_rate = [1, 0.25, 0.05, 0.01]
-    n_estimators = [50, 100, 150]
-    max_depth = [3, 8, 16, 32]
-    min_samples_split = [0.2, 0.4, 0.6, 0.8, 1.0]
-    min_samples_leaf = np.linspace(0.1, 0.5, 5, endpoint=True)
-    max_features = list(range(1,X.shape[1]))
+    # gradient = GradientBoostingClassifier()
+    # learning_rate = [1, 0.25, 0.05, 0.01]
+    # n_estimators = [50, 100, 150]
+    # max_depth = [3, 8, 16, 32]
+    # min_samples_split = [0.2, 0.4, 0.6, 0.8, 1.0]
+    # min_samples_leaf = np.linspace(0.1, 0.5, 5, endpoint=True)
+    # max_features = list(range(1,X.shape[1]))
 
-    hyperparameters = dict(learning_rate=learning_rate, n_estimators=n_estimators, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features)
+    # hyperparameters = dict(learning_rate=learning_rate, n_estimators=n_estimators, max_depth=max_depth, min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf, max_features=max_features)
 
-    clf = GridSearchCV(gradient, hyperparameters, cv=5, verbose=0)
-    best_model = clf.fit(X, y)
+    # clf = GridSearchCV(gradient, hyperparameters, cv=5, verbose=0)
+    # best_model = clf.fit(X, y)
 
-    print('Best Fit learning_rate:', best_model.best_estimator_.get_params()['learning_rate'])
-    print('Best n_estimators:', best_model.best_estimator_.get_params()['n_estimators'])
-    print('Best max_depths :', best_model.best_estimator_.get_params()['max_depth'])
-    print('Best min_samples_splits :', best_model.best_estimator_.get_params()['min_samples_split'])
-    print('Best min_samples_leafs :', best_model.best_estimator_.get_params()['min_samples_leaf'])
-    print('Best max_features :', best_model.best_estimator_.get_params()['max_features'])
+    # print('Best Fit learning_rate:', best_model.best_estimator_.get_params()['learning_rate'])
+    # print('Best n_estimators:', best_model.best_estimator_.get_params()['n_estimators'])
+    # print('Best max_depths :', best_model.best_estimator_.get_params()['max_depth'])
+    # print('Best min_samples_splits :', best_model.best_estimator_.get_params()['min_samples_split'])
+    # print('Best min_samples_leafs :', best_model.best_estimator_.get_params()['min_samples_leaf'])
+    # print('Best max_features :', best_model.best_estimator_.get_params()['max_features'])
+    X_train, X_test, y_train, y_test = train_test_split(X,y)
+
+    # learning_rates = [1, 0.5, 0.1, 0.01]
+    # train_results = []
+    # test_results = []
+    # for eta in learning_rates:
+    #     model = GradientBoostingClassifier(learning_rate=eta)
+    #     model.fit(x_train, y_train)
+    #     train_pred = model.predict(x_train)
+    #     false_positive_rate, true_positive_rate, thresholds = roc_curve(y_train, train_pred)
+    #     roc_auc = auc(false_positive_rate, true_positive_rate)
+    #     train_results.append(roc_auc)
+    #     y_pred = model.predict(x_test)
+    #     false_positive_rate, true_positive_rate, thresholds = roc_curve(y_test, y_pred)
+    #     roc_auc = auc(false_positive_rate, true_positive_rate)
+    #     test_results.append(roc_auc)
+    
+    # line1, = plt.plot(learning_rates, train_results, 'b', label='Train AUC')
+    # line2, = plt.plot(learning_rates, test_results, 'r', label='Test AUC')
+    # plt.legend(handler_map={line1: HandlerLine2D(numpoints=2)})
+    # plt.ylabel('AUC score')
+    # plt.xlabel('learning rate')
+    # plt.show()
+
+    p_test3 = {'learning_rate':[0.15,0.1,0.05,0.01,0.005,0.001], 'n_estimators':[100,250,500,750,1000,1250,1500,1750]}
+
+    tuning = GridSearchCV(estimator =GradientBoostingClassifier(max_depth=4, min_samples_split=2, min_samples_leaf=1, subsample=1,max_features='sqrt', random_state=10), 
+                param_grid = p_test3, scoring='accuracy',n_jobs=4,iid=False, cv=5)
+    tuning.fit(X_train,y_train)
+    tuning.grid_scores_, tuning.best_params_, tuning.best_score_
+
 
 def Gradient_score(X, y):
     log_scores = []
@@ -269,7 +303,7 @@ def Gradient_score(X, y):
         X_train, X_valid = X.iloc[train_index], X.iloc[test_index]
         y_train, y_valid = y.iloc[train_index], y.iloc[test_index]
 
-        gradient_model = GradientBoostingClassifier()
+        gradient_model = GradientBoostingClassifier(n_estimators=300, learning_rate = 0.25, max_features=6)
         gradient_model.fit(X_train, y_train)
 
         pred_prob = gradient_model.predict_proba(X_valid)
@@ -284,7 +318,7 @@ def Gradient_score(X, y):
 
     
 def Gradient_kaggle(test_data, X, y, listing_id):
-    gradient_model = GradientBoostingClassifier()
+    gradient_model = GradientBoostingClassifier(n_estimators=300, learning_rate = 0.25, max_features=6)
     gradient_model.fit(X, y)
 
     predicted = gradient_model.predict_proba(test_data)
@@ -340,20 +374,24 @@ if __name__ == '__main__':
     data = pd.read_csv('data_after_M1.csv')
     
     test_data = pd.read_json(sys.argv[1])
-    Exploratory_Data_Analysis(test_data)
-    Text_Feature_Extraction(test_data)
-    Feature_Selection(test_data)
+    # Exploratory_Data_Analysis(test_data)
+    # Text_Feature_Extraction(test_data)
+    # Feature_Selection(test_data)
     Feature_Selection(data)
 
     listing_id = test_data['listing_id']
 
-    print("Listing Id shape:", listing_id.shape)
+    # print("Listing Id shape:", listing_id.shape)
     # test_data =data.drop(data.columns[[0,3,4,5,6,7,9,11,12,14]])
-    test_data = test_data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count']]
-
-    print("After dropping:", test_data.shape)
+    # test_data = test_data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','Doorman','No Fee','Pre-War','Dining Room', 'Balcony','SIMPLEX','Garage','Reduced Fee','Furnished','LAUNDRY','Hardwood']]
+    # test_data.to_csv('test_data.csv', index=False)
+    
+    test_data = pd.read_csv('test_data.csv')
+    
+    # listing_id = test_data['listing_id']
+    # print("After dropping:", test_data.shape)
     # data = data.sample(n=140)
-    X= data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count']]
+    X= data[['bathrooms','bedrooms','latitude','longitude','price','hour_created','word_count','Doorman','No Fee','Pre-War','Dining Room', 'Balcony','SIMPLEX','Garage','Reduced Fee','Furnished','LAUNDRY','Hardwood']]
     
     #With nearest subway feature
     # Nearest_Subway(data)
@@ -369,18 +407,18 @@ if __name__ == '__main__':
     y = data['interest_level']
     
     #PARAMETER TUNING
-    Gradient_Param_Tuning(X, y)
+    # Gradient_Param_Tuning(X, y)
 
     #SCORE
     # Decision_tree_score(X_Subway,y)
     # Logistic_Regression_score(X_Subway, y)
     # SVM_score(X,y)
-    #Gradient_score(X,y)
+    Gradient_score(X,y)
 
     #KAGGLE
     # Decision_tree_kaggle(test_data, X_Subway, y, listing_id)
     # Logistic_Regression_kaggle(test_data, X_Subway, y, listing_id)
     # SVM_kaggle(test_data, X, y, listing_id)
-    #Gradient_kaggle(test_data, X, y, listing_id)
+    Gradient_kaggle(test_data, X, y, listing_id)
 
   
