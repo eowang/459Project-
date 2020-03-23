@@ -387,6 +387,88 @@ def Random_Forest_Kaggle (test_data, X, y, listing_id):
     df_predict_proba = df_predict_proba[col_names]
     
     df_predict_proba.to_csv('kaggle_submission_FOREST_DT.csv', index=False)
+    
+def adaBoost(X,y):
+    
+    kf = KFold(n_splits = 5)
+
+    log_scores = []
+    acc_scores = []
+
+    log_overfit_scores = []
+    acc_overfit_scores = []
+
+    #Instantiate decision tree so we can use with AdaBoost
+    dec_Tree_class = DecisionTreeClassifier(criterion='gini', max_depth=17)
+    #Instantiate SVM so we can use with AdaBoost
+    svm_model = SVC(kernel='rbf', gamma='auto', max_iter=100)
+    #Instantiate Logistic Regression so we can use with AdaBoost
+    logistic_model = LogisticRegression(max_iter=10000, fit_intercept=True, C=464.15888336127773, warm_start=True)
+    #Instantiate KNN so we can use with AdaBoost
+    near_neighbor_class = neighbors.KNeighborsClassifier(n_neighbors=5)
+    #Instantiate naiveBayes so we can use with AdaBoost
+    naiveBayes_class = GaussianNB()
+
+    adaBoost_class = AdaBoostClassifier(n_estimators=100, base_estimator=dec_Tree_class)
+
+    # #StandardScaler and Centering
+    # scaler = StandardScaler()
+    # scaler.fit(X)
+    # X_normalized = scaler.transform(X)
+
+    
+    for train_index, test_index in kf.split(X):
+        X_train, X_valid = X.iloc[train_index], X.iloc[test_index]
+        y_train, y_valid = y.iloc[train_index], y.iloc[test_index]
+        
+        adaBoost_class = adaBoost_class.fit(X_train, y_train)
+        
+        pred_prob = adaBoost_class.predict_proba(X_valid)
+        log_scores.append(log_loss(y_valid, pred_prob))
+        acc_scores.append(adaBoost_class.score(X_valid, y_valid))
+        
+        #Model validation on X_train to test if model is overfitting.
+        #Predicted proba(X_train) provides predicted prob on X_train so we can input it into log_loss function.
+        xtrain_error_prob= adaBoost_class.predict_proba(X_train)
+        # Add results into overfit metric array
+        log_overfit_scores.append(log_loss(y_train, xtrain_error_prob))
+        acc_overfit_scores.append(adaBoost_class.score(X_train, y_train))
+
+    # Average out the overfit metric scores
+    avgOverfit_log_score = statistics.mean(log_overfit_scores)
+    avgOverfit_acc_score = statistics.mean(acc_overfit_scores)
+    
+    avg_log_score = statistics.mean(log_scores)
+    avg_acc_score = statistics.mean(acc_scores)
+    print("\n\nadaBoost scores: ")
+    print("Average log loss score on y_valid:", avg_log_score)
+    print("Average accuracy score y_valid:", avg_acc_score)
+    #Overfitting metrics printed
+    print("Average overfit log loss score on y_train:", avgOverfit_log_score)
+    print("Average overfit accuracy score on y_train:", avgOverfit_acc_score)
+
+
+def adaBoost_kaggle(test_data, X, y, listing_id):
+    #Instantiate decision tree so we can use with AdaBoost
+    dec_Tree_class = DecisionTreeClassifier(criterion='gini', max_depth=17, min_samples_leaf=2, max_features='sqrt')
+
+    adaBoost_model = AdaBoostClassifier(n_estimators=100, base_estimator=dec_Tree_class)
+    adaBoost_model.fit(X, y)
+
+    predicted = adaBoost_model.predict_proba(test_data)
+
+    col_names = adaBoost_model.classes_
+    df_predict_proba = pd.DataFrame(predicted, columns= col_names)
+    df_predict_proba= df_predict_proba.reset_index(drop=True)
+
+    listing_id= listing_id.reset_index(drop=True)
+
+    df_predict_proba['listing_id'] = listing_id
+    col_names = ['listing_id', 'high', 'medium', 'low']
+
+    df_predict_proba = df_predict_proba[col_names]
+    
+    df_predict_proba.to_csv('kaggle_submission_adaBoost.csv', index=False)
 
 
 def Exploratory_Data_Analysis(data):
